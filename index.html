@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дом прочных отношений — оценка</title>
+<style>
+  :root{
+    --ink:#2b2b2b;
+    --paper:#faf6ef;
+    --orange:#e8871e;
+    --heart:#e0475f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:
+      radial-gradient(1200px 600px at 70% -10%, #fdf3e0 0%, transparent 60%),
+      radial-gradient(900px 500px at 0% 100%, #f3ede2 0%, transparent 55%),
+      var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    padding:28px 14px 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto}
+
+  /* ---------- header ---------- */
+  .top{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:14px;flex-wrap:wrap;margin-bottom:22px;
+  }
+  h1{
+    font-size:clamp(22px,4.5vw,32px);
+    font-weight:700;letter-spacing:.3px;
+  }
+  h1 .flame{color:var(--orange)}
+  .sub{font-size:14px;color:#7a7263;font-style:italic;margin-top:4px}
+
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .seg{
+    display:inline-flex;border:2px solid var(--ink);border-radius:999px;
+    overflow:hidden;background:#fff;box-shadow:2px 3px 0 rgba(43,43,43,.15);
+  }
+  .seg button{
+    font-family:inherit;font-size:15px;padding:8px 18px;border:none;
+    background:transparent;cursor:pointer;color:var(--ink);
+    transition:background .15s,color .15s;
+  }
+  .seg button.on{background:var(--ink);color:#fff}
+  .btn{
+    font-family:inherit;font-size:15px;padding:9px 20px;cursor:pointer;
+    border:2px solid var(--ink);border-radius:999px;background:var(--orange);
+    color:#fff;font-weight:700;box-shadow:2px 3px 0 rgba(43,43,43,.25);
+    transition:transform .1s;
+  }
+  .btn:active{transform:translate(1px,2px);box-shadow:none}
+  .btn.ghost{background:#fff;color:var(--ink);font-weight:400}
+
+  /* ---------- house ---------- */
+  .house{position:relative}
+  .roofbox{display:block;width:100%;height:auto;margin-bottom:-6px;position:relative;z-index:2}
+
+  .roofwrap{position:relative}
+  .overall{
+    position:absolute;left:50%;transform:translateX(-50%);
+    bottom:6px;z-index:3;text-align:center;pointer-events:none;
+  }
+  .overall .big{
+    display:inline-block;background:var(--orange);color:#fff;
+    border:3px solid var(--ink);border-radius:999px;
+    padding:10px 26px;font-size:clamp(18px,3.5vw,26px);font-weight:700;
+    box-shadow:3px 4px 0 rgba(43,43,43,.25);
+    min-width:120px;
+  }
+  .overall .lbl{font-size:12px;color:#8a8172;margin-top:6px;font-style:italic}
+
+  .body{
+    display:grid;grid-template-columns:64px 1fr 64px;
+    border:4px solid var(--ink);border-top:none;
+    border-radius:0 0 10px 10px;
+    background:#fffdf8;overflow:hidden;
+    box-shadow:0 12px 30px rgba(90,70,40,.15);
+  }
+  @media(max-width:560px){ .body{grid-template-columns:44px 1fr 44px} }
+
+  /* pillars */
+  .pillar{
+    position:relative;background:#f7ddb9;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    padding:16px 0 10px;
+  }
+  .pillar .pfill{
+    position:absolute;left:0;right:0;bottom:0;height:0%;
+    background:linear-gradient(180deg,#f5a23c,var(--orange));
+    transition:height .35s ease;
+  }
+  .pillar .pword{
+    position:relative;z-index:1;
+    writing-mode:vertical-rl;text-orientation:upright;
+    font-weight:700;font-size:clamp(15px,2.6vw,21px);letter-spacing:8px;
+    color:var(--ink);
+  }
+  .pillar .pval{
+    position:relative;z-index:1;font-size:13px;font-weight:700;
+    background:#fff;border:2px solid var(--ink);border-radius:999px;
+    padding:2px 7px;margin-top:8px;white-space:nowrap;
+  }
+
+  /* rows */
+  .rows{padding:8px 0 4px}
+  .row{
+    padding:13px 16px 14px;border-bottom:2px solid #eee6d8;
+    border-left:7px solid transparent;
+  }
+  .row:last-child{border-bottom:none}
+  .row.sub{padding-left:38px;background:#fdfaf3}
+  .row .name{
+    font-size:16.5px;font-weight:700;margin-bottom:8px;line-height:1.35;
+  }
+  .row.sub .name{font-weight:400;font-size:15px;font-style:italic;color:#4c463b}
+  .row.wall .name .tag{
+    font-size:11.5px;font-style:italic;color:#a08a5f;font-weight:400;margin-left:6px;
+  }
+  .ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+  /* hearts */
+  .hearts{display:flex;gap:4px}
+  .hearts button{
+    font-size:26px;line-height:1;background:none;border:none;cursor:pointer;
+    color:#ddd3c2;transition:transform .1s,color .15s;padding:2px;
+  }
+  .hearts button.on{color:var(--heart)}
+  .hearts button:hover{transform:scale(1.2)}
+
+  /* slider */
+  .slid{display:flex;align-items:center;gap:10px;flex:1;min-width:200px;max-width:340px}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;flex:1;height:10px;border-radius:999px;
+    background:linear-gradient(90deg,var(--c,#c9a227) var(--p,0%),#eee3cf var(--p,0%));
+    outline:none;cursor:pointer;border:1.5px solid #d8ccb4;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+    background:#fff;border:3px solid var(--c,#c9a227);cursor:pointer;
+    box-shadow:0 1px 4px rgba(0,0,0,.25);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:18px;height:18px;border-radius:50%;background:#fff;
+    border:3px solid var(--c,#c9a227);cursor:pointer;
+  }
+
+  .badge{
+    min-width:52px;text-align:center;font-weight:700;font-size:14.5px;
+    border:2px solid var(--ink);border-radius:999px;padding:3px 9px;background:#fff;
+  }
+  .badge.empty{color:#b6ab95;border-color:#d8ccb4}
+  .clr{
+    border:none;background:none;cursor:pointer;color:#c2b69d;font-size:16px;
+    padding:2px 4px;visibility:hidden;
+  }
+  .row.rated .clr{visibility:visible}
+  .clr:hover{color:#a33}
+
+  .foot{
+    text-align:center;font-size:13px;font-style:italic;color:#7a7263;
+    margin-top:16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <h1>Дом прочных отношений <span class="flame">🏠</span></h1>
+      <div class="sub">оцените каждый «этаж» вашего дома — честно, вдвоём или по отдельности</div>
+    </div>
+    <div class="controls">
+      <div class="seg" id="seg">
+        <button data-m="5" class="on">1–5 ♥</button>
+        <button data-m="pct">Проценты</button>
+      </div>
+      <button class="btn" id="save">💾 Сохранить PNG</button>
+      <button class="btn ghost" id="reset">Сбросить</button>
+    </div>
+  </div>
+
+  <div class="house">
+    <div class="roofwrap">
+      <svg class="roofbox" viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M 214 88 L 214 30 Q 206 18 216 8 Q 232 14 228 30 L 228 80" fill="none" stroke="#2b2b2b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 8 206 L 380 10 L 752 206" fill="#fffdf8" stroke="#2b2b2b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="overall">
+        <span class="big" id="ovr">—</span>
+        <div class="lbl">общая оценка</div>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="pillar" id="pil-trust">
+        <div class="pfill"></div>
+        <div class="pword">ДОВЕРИЕ</div>
+        <div class="pval">—</div>
+      </div>
+
+      <div class="rows" id="rows">
+        <div class="row" style="border-left-color:#e8871e">
+          <div class="name">⚠️ Открыто в режиме предпросмотра — без JavaScript оценки не работают.</div>
+          <div class="ctl" style="font-size:14px;color:#7a7263;font-style:italic">
+            На iPhone: в «Файлах» нажмите кнопку «Поделиться» → «Открыть в Safari», либо откройте страницу по ссылке в браузере.
+          </div>
+        </div>
+      </div>
+
+      <div class="pillar" id="pil-devotion">
+        <div class="pfill"></div>
+        <div class="pword">ПРЕДАННОСТЬ</div>
+        <div class="pval">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">*Преданность — верность, совместность, приверженность &nbsp;·&nbsp; по мотивам «Дома прочных отношений» Дж. Готтмана</div>
+</div>
+
+<script>
+'use strict';
+
+const ITEMS = [
+  {id:'meanings',  name:'Общие смыслы и ценности',                              color:'#5b7db1'},
+  {id:'dreams',    name:'Мечты друг друга',                                     color:'#2f8f9d'},
+  {id:'conflicts', name:'Работа с конфликтами',                                 color:'#31a08c'},
+  {id:'c1', sub:1, name:'Партнёрство в конфликте',                              color:'#31a08c'},
+  {id:'c2', sub:1, name:'Будьте в диалоге',                                     color:'#31a08c'},
+  {id:'c3', sub:1, name:'Эмоциональная саморегуляция, техники релаксации',      color:'#31a08c'},
+  {id:'positive',  name:'Позитивный подход, фокус на отношениях',               color:'#6aa84f'},
+  {id:'contact',   name:'Поддержание контакта, открытость друг другу',          color:'#c9a227'},
+  {id:'respect',   name:'Уважение, восхищение, тепло в отношениях',             color:'#d07f2e'},
+  {id:'friendship',name:'Дружба, понимание друг друга, эмоциональная связь',    color:'#b3382e'},
+  {id:'trust',     name:'Доверие', wall:'pil-trust',    color:'#e8871e'},
+  {id:'devotion',  name:'Преданность*', wall:'pil-devotion', color:'#e8871e'},
+];
+
+let mode = '5';                 // '5' | 'pct'
+let state = {};                 // id -> 0..100 | undefined
+
+try{
+  const s = JSON.parse(localStorage.getItem('domOtn')||'{}');
+  if(s.state) state = s.state;
+  if(s.mode)  mode  = s.mode;
+}catch(e){}
+
+function persist(){
+  try{ localStorage.setItem('domOtn', JSON.stringify({state, mode})); }catch(e){}
+}
+
+const rowsEl = document.getElementById('rows');
+
+function fmt(v){
+  if(v==null) return '—';
+  return mode==='5' ? (Math.round(v/20*10)/10).toFixed(1).replace('.0','')+' / 5' : v+'%';
+}
+
+function render(){
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on', b.dataset.m===mode));
+  rowsEl.innerHTML = '';
+  for(const it of ITEMS){
+    const v = state[it.id];
+    const row = document.createElement('div');
+    row.className = 'row'+(it.sub?' sub':'')+(it.wall?' wall':'')+(v!=null?' rated':'');
+    row.style.borderLeftColor = it.color;
+    row.dataset.id = it.id;
+
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.innerHTML = it.name + (it.wall ? ' <span class="tag">стена дома</span>' : '');
+    row.appendChild(name);
+
+    const ctl = document.createElement('div');
+    ctl.className = 'ctl';
+
+    if(mode==='5'){
+      const h = document.createElement('div');
+      h.className = 'hearts';
+      const filled = v!=null ? Math.round(v/20) : 0;
+      for(let i=1;i<=5;i++){
+        const b = document.createElement('button');
+        b.textContent = '♥';
+        b.title = i+' из 5';
+        if(i<=filled) b.classList.add('on');
+        b.onclick = ()=>setVal(it.id, i*20);
+        h.appendChild(b);
+      }
+      ctl.appendChild(h);
+    }else{
+      const s = document.createElement('div');
+      s.className='slid';
+      const r = document.createElement('input');
+      r.type='range'; r.min=0; r.max=100; r.step=5;
+      r.value = v!=null? v : 0;
+      r.style.setProperty('--c', it.color);
+      r.style.setProperty('--p', (v!=null?v:0)+'%');
+      r.oninput = ()=>{ r.style.setProperty('--p', r.value+'%'); setVal(it.id, +r.value, true); };
+      s.appendChild(r);
+      ctl.appendChild(s);
+    }
+
+    const badge = document.createElement('span');
+    badge.className = 'badge'+(v==null?' empty':'');
+    badge.textContent = fmt(v);
+    ctl.appendChild(badge);
+
+    const clr = document.createElement('button');
+    clr.className='clr'; clr.textContent='✕'; clr.title='очистить оценку';
+    clr.onclick = ()=>clearVal(it.id);
+    ctl.appendChild(clr);
+
+    row.appendChild(ctl);
+    rowsEl.appendChild(row);
+  }
+  refreshDerived();
+}
+
+function setVal(id, v, light){
+  state[id] = v;
+  persist();
+  if(light){ // slider drag: обновить только бейдж и производные, не перерисовывать
+    const row = rowsEl.querySelector('.row[data-id="'+id+'"]');
+    if(row){
+      row.classList.add('rated');
+      const b = row.querySelector('.badge');
+      b.textContent = fmt(v); b.classList.remove('empty');
+    }
+    refreshDerived();
+  }else{
+    render();
+  }
+}
+function clearVal(id){ delete state[id]; persist(); render(); }
+
+function refreshDerived(){
+  // стены
+  for(const it of ITEMS){
+    if(!it.wall) continue;
+    const p = document.getElementById(it.wall);
+    const v = state[it.id];
+    p.querySelector('.pfill').style.height = (v!=null?v:0)+'%';
+    p.querySelector('.pval').textContent = v!=null ? (mode==='5'? Math.round(v/20)+'/5' : v+'%') : '—';
+  }
+  // итог
+  const vals = ITEMS.map(i=>state[i.id]).filter(v=>v!=null);
+  const ovr = document.getElementById('ovr');
+  if(!vals.length){ ovr.textContent='—'; return; }
+  const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+  ovr.textContent = mode==='5'
+    ? (Math.round(avg/20*10)/10).toFixed(1)+' / 5'
+    : Math.round(avg)+'%';
+}
+
+document.getElementById('seg').onclick = e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  mode = b.dataset.m; persist(); render();
+};
+document.getElementById('reset').onclick = ()=>{
+  if(confirm('Сбросить все оценки?')){ state={}; persist(); render(); }
+};
+
+/* ================= PNG EXPORT ================= */
+
+document.getElementById('save').onclick = exportPNG;
+
+function wrapText(ctx, text, maxW){
+  const words = text.split(' ');
+  const lines = []; let line = '';
+  for(const w of words){
+    const t = line ? line+' '+w : w;
+    if(ctx.measureText(t).width > maxW && line){ lines.push(line); line = w; }
+    else line = t;
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function exportPNG(){
+  const SCALE=2, W=1000;
+  const PILW=74, FR_L=70, FR_R=W-70;           // frame
+  const rowsL=FR_L+PILW+34, rowsR=FR_R-PILW-34;
+  const cv = document.createElement('canvas');
+  const ctx = cv.getContext('2d');
+
+  const nonWall = ITEMS.filter(i=>!i.wall);
+  const walls   = ITEMS.filter(i=>i.wall);
+
+  // ---- measure rows ----
+  const rowMeta = [];
+  for(const it of nonWall){
+    ctx.font = (it.sub?'italic 24px':'bold 27px')+" Georgia,serif";
+    const indent = it.sub? 34:0;
+    const lines = wrapText(ctx, it.name, rowsR-rowsL-indent);
+    const h = lines.length*34 + 52 + 22;
+    rowMeta.push({it, lines, h, indent});
+  }
+  const rowsH = rowMeta.reduce((a,m)=>a+m.h,0) + 20;
+
+  const TITLE_H=120, ROOF_H=190, FOOT_H=150;
+  const H = TITLE_H + ROOF_H + rowsH + FOOT_H;
+
+  cv.width=W*SCALE; cv.height=H*SCALE;
+  ctx.scale(SCALE,SCALE);
+
+  // bg
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#fdf6e8'); g.addColorStop(1,'#f6efe1');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  // title
+  ctx.fillStyle='#2b2b2b';
+  ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+  ctx.font='bold 42px Georgia,serif';
+  ctx.fillText('Дом прочных отношений', W/2, 58);
+  ctx.font='italic 20px Georgia,serif';
+  ctx.fillStyle='#8a8172';
+  const d=new Date();
+  const ds=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+  ctx.fillText('наша оценка · '+ds, W/2, 92);
+
+  const roofTop=TITLE_H, roofBase=TITLE_H+ROOF_H;
+
+  // roof
+  ctx.lineJoin='round'; ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(FR_L-14, roofBase);
+  ctx.lineTo(W/2, roofTop+6);
+  ctx.lineTo(FR_R+14, roofBase);
+  ctx.closePath();
+  ctx.fillStyle='#fffdf8'; ctx.fill();
+  ctx.strokeStyle='#2b2b2b'; ctx.lineWidth=9; ctx.stroke();
+
+  // chimney
+  ctx.beginPath();
+  ctx.moveTo(W/2-115, roofTop+78);
+  ctx.lineTo(W/2-115, roofTop+22);
+  ctx.quadraticCurveTo(W/2-124, roofTop+8, W/2-112, roofTop+0);
+  ctx.quadraticCurveTo(W/2-94, roofTop+8, W/2-99, roofTop+24);
+  ctx.lineTo(W/2-99, roofTop+68);
+  ctx.stroke();
+
+  // overall badge in roof
+  const vals = ITEMS.map(i=>state[i.id]).filter(v=>v!=null);
+  let ovrTxt='—';
+  if(vals.length){
+    const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+    ovrTxt = mode==='5' ? (Math.round(avg/20*10)/10).toFixed(1)+' / 5' : Math.round(avg)+'%';
+  }
+  ctx.font='bold 34px Georgia,serif';
+  const bw=Math.max(150, ctx.measureText(ovrTxt).width+70);
+  rr(ctx, W/2-bw/2, roofBase-92, bw, 60, 30);
+  ctx.fillStyle='#e8871e'; ctx.fill();
+  ctx.lineWidth=5; ctx.strokeStyle='#2b2b2b'; ctx.stroke();
+  ctx.fillStyle='#fff';
+  ctx.fillText(ovrTxt, W/2, roofBase-50);
+  ctx.font='italic 17px Georgia,serif'; ctx.fillStyle='#8a8172';
+  ctx.fillText('общая оценка', W/2, roofBase-8-2);
+
+  // body frame
+  const bodyTop=roofBase, bodyBot=roofBase+rowsH;
+  ctx.fillStyle='#fffdf8';
+  ctx.fillRect(FR_L, bodyTop, FR_R-FR_L, bodyBot-bodyTop);
+  ctx.lineWidth=8; ctx.strokeStyle='#2b2b2b';
+  ctx.strokeRect(FR_L, bodyTop, FR_R-FR_L, bodyBot-bodyTop);
+
+  // pillars
+  walls.forEach((it,i)=>{
+    const px = i===0 ? FR_L+4 : FR_R-PILW-4;
+    const py = bodyTop+4, ph = bodyBot-bodyTop-8;
+    ctx.fillStyle='#f7ddb9';
+    ctx.fillRect(px,py,PILW,ph);
+    const v = state[it.id];
+    if(v!=null){
+      const fh = ph*v/100;
+      const gg=ctx.createLinearGradient(0,py+ph-fh,0,py+ph);
+      gg.addColorStop(0,'#f5a23c'); gg.addColorStop(1,'#e8871e');
+      ctx.fillStyle=gg;
+      ctx.fillRect(px, py+ph-fh, PILW, fh);
+    }
+    // vertical word
+    const word = i===0?'ДОВЕРИЕ':'ПРЕДАННОСТЬ';
+    ctx.fillStyle='#2b2b2b';
+    ctx.font='bold 26px Georgia,serif';
+    const wordH = ph-70;
+    const step = Math.min(44, wordH/word.length);
+    let ly = py+26+(wordH-step*word.length)/2;
+    for(const ch of word){
+      ctx.fillText(ch, px+PILW/2, ly+step/2);
+      ly+=step;
+    }
+    // value pill
+    const vt = v!=null ? (mode==='5'? Math.round(v/20)+'/5' : v+'%') : '—';
+    ctx.font='bold 19px Georgia,serif';
+    const pw=Math.max(56, ctx.measureText(vt).width+24);
+    rr(ctx, px+PILW/2-pw/2, py+ph-40, pw, 30, 15);
+    ctx.fillStyle='#fff'; ctx.fill();
+    ctx.lineWidth=3; ctx.strokeStyle='#2b2b2b'; ctx.stroke();
+    ctx.fillStyle='#2b2b2b';
+    ctx.fillText(vt, px+PILW/2, py+ph-18);
+  });
+
+  // rows
+  let y = bodyTop+14;
+  for(const m of rowMeta){
+    const it=m.it, v=state[it.id];
+    // color marker
+    ctx.fillStyle=it.color;
+    rr(ctx, rowsL-20+m.indent, y+10, 7, m.h-30, 3.5); ctx.fill();
+
+    ctx.textAlign='left';
+    ctx.fillStyle = it.sub? '#4c463b' : '#2b2b2b';
+    ctx.font=(it.sub?'italic 24px':'bold 27px')+' Georgia,serif';
+    let ty=y+34;
+    for(const line of m.lines){ ctx.fillText(line, rowsL+m.indent, ty); ty+=34; }
+
+    // rating
+    const ry=ty+16;
+    if(mode==='5'){
+      const filled = v!=null? Math.round(v/20):0;
+      ctx.font='34px Georgia,serif';
+      for(let i=0;i<5;i++){
+        ctx.fillStyle = i<filled ? '#e0475f' : '#ded3c0';
+        ctx.fillText('♥', rowsL+m.indent+i*40, ry+10);
+      }
+      if(v!=null){
+        ctx.fillStyle='#2b2b2b'; ctx.font='bold 23px Georgia,serif';
+        ctx.fillText((Math.round(v/20*10)/10).toFixed(1).replace('.0','')+' / 5', rowsL+m.indent+220, ry+6);
+      }else{
+        ctx.fillStyle='#b6ab95'; ctx.font='italic 21px Georgia,serif';
+        ctx.fillText('не оценено', rowsL+m.indent+220, ry+6);
+      }
+    }else{
+      const bw2=330, bh=20, bx=rowsL+m.indent, by=ry-10;
+      rr(ctx,bx,by,bw2,bh,10);
+      ctx.fillStyle='#eee3cf'; ctx.fill();
+      if(v!=null && v>0){
+        rr(ctx,bx,by,Math.max(bh,bw2*v/100),bh,10);
+        ctx.fillStyle=it.color; ctx.fill();
+      }
+      ctx.fillStyle = v!=null?'#2b2b2b':'#b6ab95';
+      ctx.font = v!=null?'bold 23px Georgia,serif':'italic 21px Georgia,serif';
+      ctx.fillText(v!=null? v+'%':'не оценено', bx+bw2+18, by+18);
+    }
+    y+=m.h;
+    // separator
+    ctx.strokeStyle='#eee6d8'; ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(rowsL-20, y-4); ctx.lineTo(rowsR+10, y-4); ctx.stroke();
+  }
+
+  // footer
+  ctx.textAlign='center';
+  ctx.fillStyle='#7a7263'; ctx.font='italic 19px Georgia,serif';
+  ctx.fillText('*Преданность — верность, совместность, приверженность', W/2, bodyBot+52);
+  ctx.font='italic 16px Georgia,serif';
+  ctx.fillText('по мотивам «Дома прочных отношений» Дж. Готтмана', W/2, bodyBot+82);
+
+  const dd=new Date(), p=n=>String(n).padStart(2,'0');
+  const fname='dom-otnosheniy-'+dd.getFullYear()+'-'+p(dd.getMonth()+1)+'-'+p(dd.getDate())+'.png';
+  cv.toBlob(b=>savePNG(b, fname, cv),'image/png');
+}
+
+function savePNG(blob, fname, cv){
+  // iPhone/iPad/Android: через системную шторку «Поделиться» → «Сохранить изображение» (в Фото)
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+                || (navigator.maxTouchPoints>1 && /Mac/.test(navigator.platform)); // iPad прикидывается Mac
+  const file = new File([blob], fname, {type:'image/png'});
+  if(isMobile && navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({files:[file], title:'Дом прочных отношений'}).catch(err=>{
+      if(err && err.name!=='AbortError') downloadPNG(blob, fname, cv);
+    });
+    return;
+  }
+  downloadPNG(blob, fname, cv);
+}
+
+function downloadPNG(blob, fname, cv){
+  try{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=fname;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+  }catch(e){
+    // последний запасной вариант: показать картинку — сохранить долгим нажатием
+    const w=window.open('about:blank');
+    if(w){ w.document.write('<img style="width:100%" src="'+cv.toDataURL('image/png')+'">'); }
+  }
+}
+
+render();
+</script>
+</body>
+</html>
