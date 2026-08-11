@@ -56,6 +56,22 @@
   .btn:active{transform:translate(1px,2px);box-shadow:none}
   .btn.ghost{background:#fff;color:var(--ink);font-weight:400}
 
+  .namebox{position:relative;display:inline-flex;align-items:center}
+  .namebox input{
+    font-family:inherit;font-size:15px;padding:9px 32px 9px 16px;
+    border:2px solid var(--ink);border-radius:999px;background:#fff;
+    width:200px;color:var(--ink);outline:none;
+    box-shadow:2px 3px 0 rgba(43,43,43,.15);
+  }
+  .namebox input:focus{border-color:var(--orange)}
+  .namebox input::placeholder{color:#b6ab95;font-style:italic}
+  .namebox .nclr{
+    position:absolute;right:10px;border:none;background:none;cursor:pointer;
+    color:#c2b69d;font-size:15px;padding:2px;visibility:hidden;
+  }
+  .namebox.filled .nclr{visibility:visible}
+  .namebox .nclr:hover{color:#a33}
+
   /* ---------- house ---------- */
   .house{position:relative}
   .roofbox{display:block;width:100%;height:auto;margin-bottom:-6px;position:relative;z-index:2}
@@ -176,6 +192,10 @@
       <div class="sub">оцените каждый «этаж» вашего дома — честно, вдвоём или по отдельности</div>
     </div>
     <div class="controls">
+      <div class="namebox" id="nbox">
+        <input id="who" maxlength="50" placeholder="Имя (кто заполняет)" autocomplete="off">
+        <button class="nclr" id="whoclr" title="очистить имя">✕</button>
+      </div>
       <div class="seg" id="seg">
         <button data-m="5" class="on">1–5 ♥</button>
         <button data-m="pct">Проценты</button>
@@ -245,15 +265,28 @@ const ITEMS = [
 let mode = '5';                 // '5' | 'pct'
 let state = {};                 // id -> 0..100 | undefined
 
+const whoEl  = document.getElementById('who');
+const nboxEl = document.getElementById('nbox');
+
 try{
   const s = JSON.parse(localStorage.getItem('domOtn')||'{}');
   if(s.state) state = s.state;
   if(s.mode)  mode  = s.mode;
+  if(s.who)   whoEl.value = String(s.who).slice(0,50);
 }catch(e){}
+nboxEl.classList.toggle('filled', !!whoEl.value);
 
 function persist(){
-  try{ localStorage.setItem('domOtn', JSON.stringify({state, mode})); }catch(e){}
+  try{ localStorage.setItem('domOtn', JSON.stringify({state, mode, who: whoEl.value.slice(0,50)})); }catch(e){}
 }
+
+whoEl.addEventListener('input', ()=>{
+  nboxEl.classList.toggle('filled', !!whoEl.value);
+  persist();
+});
+document.getElementById('whoclr').onclick = ()=>{
+  whoEl.value=''; nboxEl.classList.remove('filled'); persist(); whoEl.focus();
+};
 
 const rowsEl = document.getElementById('rows');
 
@@ -429,11 +462,14 @@ function exportPNG(){
   ctx.textAlign='center'; ctx.textBaseline='alphabetic';
   ctx.font='bold 42px Georgia,serif';
   ctx.fillText('Дом прочных отношений', W/2, 58);
-  ctx.font='italic 20px Georgia,serif';
   ctx.fillStyle='#8a8172';
   const d=new Date();
   const ds=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
-  ctx.fillText('наша оценка · '+ds, W/2, 92);
+  const whoName=(whoEl.value||'').trim().slice(0,50);
+  const subT=(whoName? 'заполнил(а): '+whoName : 'наша оценка')+' · '+ds;
+  ctx.font='italic 20px Georgia,serif';
+  if(ctx.measureText(subT).width > 840) ctx.font='italic 16px Georgia,serif';
+  ctx.fillText(subT, W/2, 92);
 
   const roofTop=TITLE_H, roofBase=TITLE_H+ROOF_H;
 
@@ -573,7 +609,8 @@ function exportPNG(){
   ctx.fillText('по мотивам «Дома прочных отношений» Дж. Готтмана', W/2, bodyBot+82);
 
   const dd=new Date(), p=n=>String(n).padStart(2,'0');
-  const fname='dom-otnosheniy-'+dd.getFullYear()+'-'+p(dd.getMonth()+1)+'-'+p(dd.getDate())+'.png';
+  const slug=whoName.replace(/[^\p{L}\p{N} _-]/gu,'').trim().replace(/\s+/g,'_').slice(0,30);
+  const fname='dom-otnosheniy-'+(slug? slug+'-':'')+dd.getFullYear()+'-'+p(dd.getMonth()+1)+'-'+p(dd.getDate())+'.png';
   cv.toBlob(b=>savePNG(b, fname, cv),'image/png');
 }
 
