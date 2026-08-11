@@ -437,12 +437,13 @@ function exportPNG(){
   const nonWall = ITEMS.filter(i=>!i.wall);
   const walls   = ITEMS.filter(i=>i.wall);
 
-  // ---- measure rows ----
+  // ---- measure rows (стены тоже выводим строками, как на странице) ----
   const rowMeta = [];
-  for(const it of nonWall){
+  for(const it of ITEMS){
     ctx.font = (it.sub?'italic 24px':'bold 27px')+" Georgia,serif";
     const indent = it.sub? 34:0;
-    const lines = wrapText(ctx, it.name, rowsR-rowsL-indent);
+    const label = it.wall ? it.name+' — стена дома' : it.name;
+    const lines = wrapText(ctx, label, rowsR-rowsL-indent);
     const h = lines.length*34 + 52 + 22;
     rowMeta.push({it, lines, h, indent});
   }
